@@ -1,5 +1,40 @@
+syntax = "proto2";
+
 package hdfs;
 
 option java_package = "ds.hdfs";
-option java_outer_classname = "SOMETHING";
+option java_outer_classname = "HdfsDefn";
 
+message File {
+	required string name = 1;
+	required double bytes = 2;
+	required string serverName = 3;
+	required string port = 4;
+	required string ip = 5;
+	required DataNode nodes = 6;
+
+}
+
+message DataNode {
+	required string id = 1;
+	repeated Block blocks = 2;
+	required int32 replicas = 3;
+
+	enum Status {
+		ALIVE = 0;
+		DEAD = 1;
+	}
+
+	required Status status = 4 [default = ALIVE];
+}
+
+message Block {
+	required string content = 1;
+	required double bytes = 2;
+	required string status = 3;
+	required string location = 4;
+}
+
+message Result {
+	repeated File file = 1;
+}
