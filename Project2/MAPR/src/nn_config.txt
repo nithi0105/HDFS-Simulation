@@ -1,0 +1,2 @@
+#contains namenode details Name; IP; port
+NN;192.168.12.75;2004
