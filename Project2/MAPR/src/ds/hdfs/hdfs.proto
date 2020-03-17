@@ -7,16 +7,16 @@ option java_outer_classname = "HdfsDefn";
 
 message File {
 	required string name = 1;
-	required int32 handle = 2;
-	required bool writemode = 3;
+	optional int32 handle = 2;
+	optional bool writemode = 3;
 	repeated Block chunks = 4;
 
 }
 
 message DataNode {
 	required string id = 1;
-	repeated Block blocks = 2;
-	required int32 replicas = 3;
+	optional int32 replicas = 2;
+	optional double timestamp = 3;
 
 	enum Status {
 		ALIVE = 0;
@@ -28,18 +28,24 @@ message DataNode {
 
 message Block {
 	required string name = 1;
-	required string content = 2;
-	required double bytes = 3;
-	required string location = 4;
+	optional string content = 2;
+	optional double bytes = 3;
+	optional string location = 4;
+	repeated DataNode datanodes = 5;
+	optional double timestamp = 6;
 
 	enum Status {
 		ALIVE = 0;
 		DEAD = 1;
 	}
 
-	required Status status = 5 [default = ALIVE];
+	optional Status status = 7 [default = ALIVE];
 }
 
-message Result {
+message Result_File {
 	repeated File file = 1;
+}
+
+message Result_Block {
+	repeated Block block = 1;
 }
