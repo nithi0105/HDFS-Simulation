@@ -33,9 +33,19 @@ public class DataNode implements IDataNode
     public DataNode()
     {
         //Constructor
+        String name;
+        //int ID;
+        int storagePort;
+        int IP;
+        public DataNode(String name, int storagePort, int IP){
+            this.name = name;
+            //this.ID = ID;
+            this.storagePort = storagePort;
+            this.IP = IP;
+        }
     }
 
-    public static void appendtoFile(String Filename, String Line)
+    /*public static void appendtoFile(String Filename, String Line)
     {
         BufferedWriter bw = null;
 
@@ -54,7 +64,7 @@ public class DataNode implements IDataNode
             }
         }
 
-    }
+    }*/
 
     public byte[] readBlock(byte[] Inp)
     {
