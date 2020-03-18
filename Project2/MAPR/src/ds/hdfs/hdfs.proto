@@ -46,6 +46,10 @@ message Result_File {
 	repeated File file = 1;
 }
 
+message Result_DataNode {
+	repeated DataNode datanode = 1;
+}
+
 message Result_Block {
 	repeated Block block = 1;
 }
