@@ -40,7 +40,7 @@ import com.google.protobuf.*;
 public class NameNode implements INameNode{
 
 	protected Registry serverRegistry;
-	HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
+	//HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
 	String ip;
 	int port;
 	String name;
@@ -104,7 +104,7 @@ public class NameNode implements INameNode{
 	        
 	        ret.setName(f.getName());
 	        ret.setHandle(fd.hashCode());
-	        ret.setWritemode(f.getWritemode());
+	        //ret.setWritemode(f.getWritemode());
 	        ret.addAllChunks(f.getChunksList());
 	        
 	        fileInputStream.close();
@@ -113,12 +113,12 @@ public class NameNode implements INameNode{
 		{
 			System.err.println("Error at " + this.getClass() + e.toString());
 			e.printStackTrace();
-			response.setStatus(HdfsDefn.DataNode.Status.DEAD);
+			//response.setStatus(HdfsDefn.DataNode.Status.DEAD);
 		}
 		return ret.build().toByteArray();
 	}
 	
-	public byte[] closeFile(byte[] inp ) throws RemoteException
+	/*public byte[] closeFile(byte[] inp ) throws RemoteException
 	{
 		try
 		{
@@ -127,11 +127,11 @@ public class NameNode implements INameNode{
 		{
 			System.err.println("Error at closefileRequest " + e.toString());
 			e.printStackTrace();
-			response.setStatus(HdfsDefn.DataNode.Status.DEAD);
+			//response.setStatus(HdfsDefn.DataNode.Status.DEAD);
 		}
 		
 		return response.build().toByteArray();
-	}
+	}*/
 	
 	public byte[] getBlockLocations(byte[] inp ) throws RemoteException
 	{
@@ -145,8 +145,8 @@ public class NameNode implements INameNode{
 				if(file.getName().equals(f.getName())) {
 					for(HdfsDefn.Block block : file.getChunksList()) {
 						if(block.getName().equals(f.getName())) {
-							ArrayList<HdfsDefn.DataNode> dns = (ArrayList<HdfsDefn.DataNode>) block.getDatanodesList();
-							resDn.addAllDatanode(dns);
+							ArrayList<HdfsDefn.DataNode> dnList = (ArrayList<HdfsDefn.DataNode>) block.getDatanodesList();
+							resDn.addAllDatanode(dnList);
 						}
 					}
 				}
@@ -156,7 +156,7 @@ public class NameNode implements INameNode{
 		{
 			System.err.println("Error at getBlockLocations "+ e.toString());
 			e.printStackTrace();
-			response.setStatus(HdfsDefn.DataNode.Status.DEAD);
+			//response.setStatus(HdfsDefn.DataNode.Status.DEAD);
 		}		
 		return resDn.build().toByteArray();
 	}
@@ -200,21 +200,19 @@ public class NameNode implements INameNode{
 					e.printStackTrace();
 				}
 				
-				/*String dnName = ipaddress  (read config)
-				dn.setId(dnName);
-				dn.setStatus(HdfsDefn.DataNode.Status.ALIVE);
-				chunk.addDatanodes(dn);*/
-				
 				retFile.addChunks(chunk);
 			}
 			
-			/*HdfsDefn.File result = retFile.build();
-			FileOutputStream output = new FileOutputStream("result_protobuf", true);
-			result.writeTo(output);*/
-			
-			//read file -> filename: block list
-			//parsefrom protobuf file
-			//getblocklocations(block list) ?
+			//add file to proto file
+			HdfsDefn.File result = retFile.build();
+			try {
+				FileOutputStream output = new FileOutputStream("file_protobuf", true);
+				result.writeTo(output);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
 			
 		}
@@ -222,10 +220,10 @@ public class NameNode implements INameNode{
 		{
 			System.err.println("Error at AssignBlock "+ e.toString());
 			e.printStackTrace();
-			response.setStatus(HdfsDefn.DataNode.Status.DEAD);
+			//response.setStatus(HdfsDefn.DataNode.Status.DEAD);
 		}
 		
-		return response.build().toByteArray();
+		return retFile.build().toByteArray();
 	}
 		
 	
@@ -245,7 +243,7 @@ public class NameNode implements INameNode{
 		} catch (IOException e) {
 			System.err.println("Error at list "+ e.toString());
 			e.printStackTrace();
-			response.setStatus(HdfsDefn.DataNode.Status.DEAD);
+			//response.setStatus(HdfsDefn.DataNode.Status.DEAD);
 		}
 			
 		return result.toByteArray();
@@ -255,88 +253,30 @@ public class NameNode implements INameNode{
 		
 	public byte[] blockReport(byte[] inp ) throws RemoteException
 	{
-		PrintWriter writer = null;
-        //write to file "filename: filename.1, filename.2, filename.3, ..."
-        //file to protobuf
-		
+		HdfsDefn.Result_Block.Builder resBlocks = HdfsDefn.Result_Block.newBuilder();
 		try {
-			writer = new PrintWriter(new BufferedWriter(new FileWriter("result_output.txt", true)));
-
-			HdfsDefn.File result = HdfsDefn.File.parseFrom(inp);
-			//HdfsDefn.File result = HdfsDefn.File.parseFrom(new FileInputStream("result_protobuf"));
-			writer.print(result.getName() + ":");
-			int dnCounter = 0;
-		    
-			for(HdfsDefn.Block block : result.getChunksList()) {
-				writer.print("[" + block.getName() + ":");
-				int numDn = block.getDatanodesCount();
-				
-				for(HdfsDefn.DataNode dn : block.getDatanodesList()) {
-					dnCounter++;
-					if(dnCounter == numDn) {
-						writer.print(dn.getId() + "," + dn.getStatus() + ":");
-					} else {
-						writer.print(dn.getId() + "," + dn.getStatus() + "]");
-					}
+			HdfsDefn.File input = HdfsDefn.File.parseFrom(inp);
+			HdfsDefn.Result_File proto = HdfsDefn.Result_File.parseFrom(new FileInputStream("file_protobuf"));
+			for(HdfsDefn.File file : proto.getFileList()) {
+				if(input.getName().equals(file.getName())) {
+					ArrayList<HdfsDefn.Block> blockList = (ArrayList<HdfsDefn.Block>) file.getChunksList();
+					resBlocks.addAllBlock(blockList);
 				}
 			}
-		    writer.println("");
-		    
-			/*try {
-				HdfsDefn.Result_File f = HdfsDefn.Result_File.parseFrom(new FileInputStream("file_protobuf"));
-				for(HdfsDefn.File file : f.getFileList()) {
-					for(HdfsDefn.Block block : file.getChunksList()) {
-						writer.print("[" + block.getName() + ":");
-						int numDn = block.getDatanodesCount();
-						
-						for(HdfsDefn.DataNode dn : block.getDatanodesList()) {
-							dnCounter++;
-							if(dnCounter == numDn) {
-								writer.print(dn.getId() + "," + dn.getStatus() + ":");
-							} else {
-								writer.print(dn.getId() + "," + dn.getStatus() + "]");
-							}
-						}
-					}
-				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			//add datanode to file
-			try {
-				FileOutputStream output = new FileOutputStream("result_protobuf", true);
-				result.writeTo(output);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}*/
-
 		} catch (IOException e) {
 			System.err.println("Error at blockReport "+ e.toString());
 			e.printStackTrace();
-			response.setStatus(HdfsDefn.DataNode.Status.DEAD);
-		} finally {
-	        if (writer != null) {
-	            writer.close();
-	        }
-	        else {
-	            //System.out.println("PrintWriter not open");
-	        }
+			//response.setStatus(HdfsDefn.DataNode.Status.DEAD);
 		}
-		return response.build().toByteArray();
+		return resBlocks.build().toByteArray();
 	}
-	
-	
 	
 	public byte[] heartBeat(byte[] inp ) throws RemoteException
 	{
+		HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
 		try {
 			HdfsDefn.DataNode dd = HdfsDefn.DataNode.parseFrom(inp);
-			response.setId(dd.getId());
+			response.setId(dd.getId()); //ipaddress  (read config?)
 			//response.setReplicas(dd.getReplicas());
 			response.setStatus(HdfsDefn.DataNode.Status.ALIVE);
 			response.setTimestamp(dd.getTimestamp());
@@ -366,45 +306,8 @@ public class NameNode implements INameNode{
 				e.printStackTrace();
 			}
 			
-			/*File f = new File("dn_output.txt");
-			
-			try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-				String line;
-				while ((line = br.readLine()) != null) {
-					if(line.indexOf(":") >= 0) {
-						String dnName = line.substring(0, line.indexOf(":"));
-						if(dnName.equals(dd.getId())) {
-							//datanode already in file
-							return response.build().toByteArray();
-						}
-					}
-				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			//add datanode to file
-			PrintWriter writer = null;
-			try {
-				writer = new PrintWriter(new BufferedWriter(new FileWriter("dn_output.txt", true)));
-				writer.print(response.getId() + ":" + response.getTimestamp());
-			    writer.println("");
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-		        if (writer != null) {
-		            writer.close();
-		        }
-		        else {
-		            //System.out.println("PrintWriter not open");
-		        }
-			}*/
-			
 			//if datanode is dead
-			//delete blocks in block list
+			//delete blocks in block list (parse file_protobuf to change status of datanode)
 			//update file with delete
 			
 		} catch (InvalidProtocolBufferException e) {
@@ -435,11 +338,11 @@ public class NameNode implements INameNode{
             e.printStackTrace();
         }
         
-        //write a file in hdfs
+        /*//write a file in hdfs
         NameNode.FileInfo file = new NameNode.FileInfo("file", 1, true);
         file.Chunks = new ArrayList<Integer>();
         
-        /*try {
+        try {
 			NameNode.DataNode dn = new NameNode.DataNode(RemoteServer.getClientHost(), 1, "1");
 		} catch (ServerNotActiveException e) {
 			e.printStackTrace();
