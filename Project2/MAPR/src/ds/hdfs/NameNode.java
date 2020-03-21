@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -39,7 +40,7 @@ import com.google.protobuf.*;
 
 public class NameNode implements INameNode{
 
-	protected Registry serverRegistry;
+	protected static Registry serverRegistry;
 	//HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
 	String ip;
 	int port;
@@ -135,6 +136,7 @@ public class NameNode implements INameNode{
 	
 	public byte[] getBlockLocations(byte[] inp ) throws RemoteException
 	{
+		//find blocks to put together file for read
 		HdfsDefn.Result_DataNode.Builder resDn = HdfsDefn.Result_DataNode.newBuilder();
 		try
 		{
@@ -169,13 +171,18 @@ public class NameNode implements INameNode{
 		try
 		{
 			HdfsDefn.File f = HdfsDefn.File.parseFrom(inp);
+			HdfsDefn.Result_DataNode fileDn = HdfsDefn.Result_DataNode.parseFrom(new FileInputStream("dn_protobuf"));
 			retFile.setName(f.getName());
-			//find blocks to put together file for read
 			
 	        //file size/block size = # of blocks to a file -- replication factor is 2
+			int repFactor = 2;
+			int repCount = 0;
 			long fileSize = new File(f.getName()).length();
 			long blockSize = 64; //make configurable (read config)
 			long numBlocks = (long) Math.ceil(fileSize/blockSize);
+			ArrayList<HdfsDefn.DataNode> dnList = (ArrayList<HdfsDefn.DataNode>) fileDn.getDatanodeList();
+			Random randomizer = new Random();
+			
 			for(int i = 0; i < numBlocks; i++) {
 				Block.Builder chunk = Block.newBuilder();
 				
@@ -183,23 +190,19 @@ public class NameNode implements INameNode{
 				chunk.setName(blockName);
 				
 				//For each block, ask the NN for a list of DNs where you will replicate them
-				try {
-					HdfsDefn.Result_DataNode fileDn = HdfsDefn.Result_DataNode.parseFrom(new FileInputStream("dn_protobuf"));
-					for(HdfsDefn.DataNode dn : fileDn.getDatanodeList()) {
-						switch(dn.getStatus()) {
-						case ALIVE:
-							//can write block to this datanode
-							break;
-						case DEAD:
-							break;
-						}
+				while(repCount < repFactor) {
+					HdfsDefn.DataNode randomDn = dnList.get(randomizer.nextInt(dnList.size()));
+					//look for a datanode that is alive
+					while(randomDn.getStatus() == HdfsDefn.DataNode.Status.DEAD) {
+						//check if this datanode already has this block
+						randomDn = dnList.get(randomizer.nextInt(dnList.size()));
 					}
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
+					//can write block to this datanode
+					chunk.addDatanodes(randomDn);
+					repCount++;
 				}
-				
+				repCount = 0;
+						
 				retFile.addChunks(chunk);
 			}
 			
@@ -213,7 +216,6 @@ public class NameNode implements INameNode{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
 			
 		}
 		catch(Exception e)
@@ -325,30 +327,17 @@ public class NameNode implements INameNode{
 	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
 	{
         try {
-            NameNode obj = new NameNode(null, 0, null);
-            INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
-
-            // Bind the remote object's stub in the registry
-            Registry registry = LocateRegistry.getRegistry();
-            registry.bind("INameNode", stub);
+	        NameNode obj = new NameNode(null, 2007, null); //get paramaters from config?
+	        INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 2007);
+	        serverRegistry = LocateRegistry.createRegistry(2007);
+	        //bind the remote object's stub in the registry
+	        serverRegistry.bind("INameNode", stub);
 
             System.err.println("Server ready");
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
         }
-        
-        /*//write a file in hdfs
-        NameNode.FileInfo file = new NameNode.FileInfo("file", 1, true);
-        file.Chunks = new ArrayList<Integer>();
-        
-        try {
-			NameNode.DataNode dn = new NameNode.DataNode(RemoteServer.getClientHost(), 1, "1");
-		} catch (ServerNotActiveException e) {
-			e.printStackTrace();
-		}*/
-
-        
 	}
 	
 }
