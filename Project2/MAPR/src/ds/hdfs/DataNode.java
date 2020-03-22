@@ -18,11 +18,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.*;
 import java.nio.charset.Charset;
 
-import ds.hdfs.hdfsformat.*;
+//import ds.hdfs.hdfsformat.*;
 import ds.hdfs.IDataNode.*;
 
 public class DataNode implements IDataNode
 {
+	HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder(); //temp
     protected String MyChunksFile;
     protected INameNode NNStub;
     protected String MyIP;
@@ -30,19 +31,12 @@ public class DataNode implements IDataNode
     protected String MyName;
     protected int MyID;
 
-    public DataNode()
+    public DataNode(String name, int storagePort, String IP)
     {
         //Constructor
-        String name;
-        //int ID;
-        int storagePort;
-        int IP;
-        public DataNode(String name, int storagePort, int IP){
-            this.name = name;
-            //this.ID = ID;
-            this.storagePort = storagePort;
-            this.IP = IP;
-        }
+    	this.MyName = name;
+    	this.MyPort = storagePort;
+        this.MyIP = IP;
     }
 
     /*public static void appendtoFile(String Filename, String Line)
@@ -74,7 +68,7 @@ public class DataNode implements IDataNode
         catch(Exception e)
         {
             System.out.println("Error at readBlock");
-            response.setStatus(-1);
+            //response.setStatus(-1);
         }
 
         return response.build().toByteArray();
@@ -88,7 +82,7 @@ public class DataNode implements IDataNode
         catch(Exception e)
         {
             System.out.println("Error at writeBlock ");
-            response.setStatus(-1);
+            //response.setStatus(-1);
         }
 
         return response.build().toByteArray();
@@ -104,7 +98,7 @@ public class DataNode implements IDataNode
         {
             IDataNode stub = (IDataNode) UnicastRemoteObject.exportObject(this, 0);
             System.setProperty("java.rmi.server.hostname", IP);
-            Registry registry = LocateRegistry.getRegistry(Port);
+            Registry registry = LocateRegistry.createRegistry(Port);
             registry.rebind(Name, stub);
             System.out.println("\nDataNode connected to RMIregistry\n");
         }catch(Exception e){
@@ -133,7 +127,10 @@ public class DataNode implements IDataNode
     public static void main(String args[]) throws InvalidProtocolBufferException, IOException
     {
         //Define a Datanode Me
-        DataNode Me = new DataNode();        
+        DataNode Me = new DataNode("cp", 2005, "128.6.13.177"); //get from dn config?
+        INameNode stub = Me.GetNNStub("INameNode", "128.6.13.175", 2007); //get from nn config?
+        Me.NNStub = stub;
+        Me.BindServer("IDataNode", "128.6.13.177", 2005); //get from config
 
     }
 }
