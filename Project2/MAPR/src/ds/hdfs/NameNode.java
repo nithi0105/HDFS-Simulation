@@ -106,7 +106,7 @@ public class NameNode implements INameNode{
 	        ret.setName(f.getName());
 	        ret.setHandle(fd.hashCode());
 	        //ret.setWritemode(f.getWritemode());
-	        ret.addAllChunks(f.getChunksList());
+	        //ret.addAllChunks(f.getChunksList());
 	        
 	        fileInputStream.close();
 		}
@@ -232,8 +232,6 @@ public class NameNode implements INameNode{
 	public byte[] list(byte[] inp ) throws RemoteException
 	{
 		//list all files in arraylist (no directory implementation)
-		//persist array list of files and chunks into "dn_output.txt" (did so in heartbeat)
-		//parse proto file
 		HdfsDefn.Result_File result = null;
 		try {
 			result = HdfsDefn.Result_File.parseFrom(new FileInputStream("file_protobuf"));
@@ -327,12 +325,11 @@ public class NameNode implements INameNode{
 	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
 	{
         try {
-	        NameNode obj = new NameNode(null, 2007, null); //get paramaters from config?
-	        INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 2007);
+	        NameNode obj = new NameNode("128.6.13.175", 2007, "INameNode"); //get paramaters from nn config?
+	        INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
 	        serverRegistry = LocateRegistry.createRegistry(2007);
-	        //bind the remote object's stub in the registry
 	        serverRegistry.bind("INameNode", stub);
-
+	        
             System.err.println("Server ready");
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
