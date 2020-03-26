@@ -26,6 +26,18 @@ message DataNode {
 	required Status status = 4 [default = ALIVE];
 }
 
+message dataNode{
+	required string sName = 1;
+	required string address = 2;
+	required int32 port = 3;
+	enum Status {
+		ALIVE = 0;
+		DEAD = 1;
+	}
+
+	required Status status = 4 [default = ALIVE];
+}
+
 message Block {
 	required string name = 1;
 	optional string content = 2;
