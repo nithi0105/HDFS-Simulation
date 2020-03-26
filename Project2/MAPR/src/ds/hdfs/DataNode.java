@@ -60,6 +60,38 @@ public class DataNode implements IDataNode
 
     }*/
 
+    public String[] readConfig(String filename){
+        BufferedReader objReader = null;
+        try {
+            String strCurrentLine;
+
+            objReader = new BufferedReader(new FileReader(filename));
+
+            while ((strCurrentLine = objReader.readLine()) != null) {
+            ArrayList<String> configDetails = new ArrayList<String>();
+            configDetails.add(strCurrentLine);
+    	    if(configDetails.size()>0) {
+    		String to_split = configDetails[0];
+    		String[] config_split = to_split.split(";");
+            //System.out.println(strCurrentLine);
+        }
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+        try {
+            if (objReader != null)
+            objReader.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        }
+        return config_split;
+}
+
     public byte[] readBlock(byte[] Inp)
     {
         try
@@ -107,12 +139,16 @@ public class DataNode implements IDataNode
         }
     }
 
-    public INameNode GetNNStub(String Name, String IP, int Port)
+    public INameNode GetNNStub(String filename)
     {
         while(true)
         {
             try
             {
+                String [] config_split = readConfig(filename);
+                String Name = config_split[0];
+                String IP = config_split[1];
+                int Port = config_split[2];
                 Registry registry = LocateRegistry.getRegistry(IP, Port);
                 INameNode stub = (INameNode) registry.lookup(Name);
                 System.out.println("NameNode Found!");
@@ -124,11 +160,30 @@ public class DataNode implements IDataNode
         }
     }
 
+    /*public INameNode GetNNStub(String Name, String IP, int Port)
+    {
+        while(true)
+        {
+            try
+            {
+                String [] config_split = readConfig("nn_config.txt");
+
+                Registry registry = LocateRegistry.getRegistry(IP, Port);
+                INameNode stub = (INameNode) registry.lookup(Name);
+                System.out.println("NameNode Found!");
+                return stub;
+            }catch(Exception e){
+                System.out.println("NameNode still not Found");
+                continue;
+            }
+        }
+    }*/
+
     public static void main(String args[]) throws InvalidProtocolBufferException, IOException
     {
         //Define a Datanode Me
         DataNode Me = new DataNode("cp", 2005, "128.6.13.177"); //get from dn config?
-        INameNode stub = Me.GetNNStub("INameNode", "128.6.13.175", 2007); //get from nn config?
+        INameNode stub = Me.GetNNStub("nn_config.txt"); //get from nn config?
         Me.NNStub = stub;
         Me.BindServer("IDataNode", "128.6.13.177", 2005); //get from config
 
