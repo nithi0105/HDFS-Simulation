@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -42,6 +45,7 @@ public class NameNode implements INameNode{
 
 	protected static Registry serverRegistry;
 	//HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
+	boolean isExecuted = false;
 	String ip;
 	int port;
 	String name;
@@ -175,8 +179,8 @@ public class NameNode implements INameNode{
 			retFile.setName(f.getName());
 			
 	        //file size/block size = # of blocks to a file -- replication factor is 2
-			int repFactor = 2;
-			int repCount = 0;
+			int replicaFactor = 2;
+			int replicaCount = 0;
 			long fileSize = new File(f.getName()).length();
 			long blockSize = 64; //make configurable (read config)
 			long numBlocks = (long) Math.ceil(fileSize/blockSize);
@@ -190,7 +194,7 @@ public class NameNode implements INameNode{
 				chunk.setName(blockName);
 				
 				//For each block, ask the NN for a list of DNs where you will replicate them
-				while(repCount < repFactor) {
+				while(replicaCount < replicaFactor) {
 					HdfsDefn.DataNode randomDn = dnList.get(randomizer.nextInt(dnList.size()));
 					//look for a datanode that is alive
 					while(randomDn.getStatus() == HdfsDefn.DataNode.Status.DEAD) {
@@ -199,15 +203,15 @@ public class NameNode implements INameNode{
 					}
 					//can write block to this datanode
 					chunk.addDatanodes(randomDn);
-					repCount++;
+					replicaCount++;
 				}
-				repCount = 0;
+				replicaCount = 0;
 						
 				retFile.addChunks(chunk);
 			}
 			
 			//add file to proto file
-			HdfsDefn.File result = retFile.build();
+			/*HdfsDefn.File result = retFile.build();
 			try {
 				FileOutputStream output = new FileOutputStream("file_protobuf", true);
 				result.writeTo(output);
@@ -215,7 +219,7 @@ public class NameNode implements INameNode{
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			}
+			}*/
 			
 		}
 		catch(Exception e)
@@ -274,45 +278,49 @@ public class NameNode implements INameNode{
 	public byte[] heartBeat(byte[] inp ) throws RemoteException
 	{
 		HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
-		try {
-			HdfsDefn.DataNode dd = HdfsDefn.DataNode.parseFrom(inp);
-			response.setId(dd.getId()); //ipaddress  (read config?)
-			//response.setReplicas(dd.getReplicas());
-			response.setStatus(HdfsDefn.DataNode.Status.ALIVE);
-			response.setTimestamp(dd.getTimestamp());
-			
+		
 			try {
-				HdfsDefn.Result_DataNode fileDn = HdfsDefn.Result_DataNode.parseFrom(new FileInputStream("dn_protobuf"));
-				for(HdfsDefn.DataNode dn : fileDn.getDatanodeList()) {
-					if(dd.getId().equals(dn.getId())) {
-						//datanode already in file
-						return response.build().toByteArray();
+				HdfsDefn.DataNode dd = HdfsDefn.DataNode.parseFrom(inp);
+				response.setId(dd.getId()); //ipaddress  (read config?)
+				//response.setReplicas(dd.getReplicas());
+				response.setStatus(HdfsDefn.DataNode.Status.ALIVE);
+				response.setTimestamp(dd.getTimestamp());
+				
+				try {
+					HdfsDefn.Result_DataNode fileDn = HdfsDefn.Result_DataNode.parseFrom(new FileInputStream("dn_protobuf"));
+					for(HdfsDefn.DataNode dn : fileDn.getDatanodeList()) {
+						if(dd.getId().equals(dn.getId())) {
+							//datanode already in file
+							return response.build().toByteArray();
+						}
+					}
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				//add datanode to file
+				HdfsDefn.DataNode result = response.build();
+				synchronized(this) {
+					try {
+						FileOutputStream output = new FileOutputStream("dn_protobuf", true);
+						result.writeTo(output);
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			//add datanode to file
-			HdfsDefn.DataNode result = response.build();
-			try {
-				FileOutputStream output = new FileOutputStream("dn_protobuf", true);
-				result.writeTo(output);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+				
+				//if datanode is dead
+				//delete blocks in block list (parse file_protobuf to change status of datanode)
+				//update file with delete
+				
+			} catch (InvalidProtocolBufferException e) {
 				e.printStackTrace();
 			}
-			
-			//if datanode is dead
-			//delete blocks in block list (parse file_protobuf to change status of datanode)
-			//update file with delete
-			
-		} catch (InvalidProtocolBufferException e) {
-			e.printStackTrace();
-		}
+		
 		
 		return response.build().toByteArray();
 	}
@@ -322,15 +330,48 @@ public class NameNode implements INameNode{
 		System.out.println(msg);		
 	}
 	
+	public Runnable blockRunnable = new Runnable() {
+		@Override
+		public void run() {
+			try {
+				blockReport(null);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+			
+		}
+	};
+	
 	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
 	{
+		String name = "";
+		String ip = "";
+		int port = 0;
+		try (BufferedReader br = new BufferedReader(new FileReader("nn_config.txt"))) {
+			String line = br.readLine();
+			String[] params = line.split(";");
+			
+			name = params[0];
+			ip = params[1];
+			port = Integer.valueOf(params[2]);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
         try {
-	        NameNode obj = new NameNode("128.6.13.175", 2007, "INameNode"); //get paramaters from nn config?
+	        NameNode obj = new NameNode(ip, port, "INameNode");
 	        INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
 	        serverRegistry = LocateRegistry.createRegistry(2007);
 	        serverRegistry.bind("INameNode", stub);
-	        
             System.err.println("Server ready");
+            
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(obj.blockRunnable, 0, 3, TimeUnit.SECONDS);
+            
+            /*Thread tobj = new Thread(obj);
+            tobj.start();*/
+            
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
