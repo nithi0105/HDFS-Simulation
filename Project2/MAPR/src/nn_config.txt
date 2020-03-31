@@ -1,2 +1,1 @@
-#contains namenode details Name; IP; port
-NN;192.168.12.75;2004
+INameNode;128.6.13.175;2007
