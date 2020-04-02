@@ -14,44 +14,34 @@ message File {
 }
 
 message DataNode {
-	required string id = 1;
-	optional int32 replicas = 2;
-	optional double timestamp = 3;
-
-	enum Status {
-		ALIVE = 0;
-		DEAD = 1;
-	}
-
-	required Status status = 4 [default = ALIVE];
-}
-
-message dataNode{
 	required string sName = 1;
 	required string address = 2;
 	required int32 port = 3;
+	optional double timestamp = 4;
+
 	enum Status {
 		ALIVE = 0;
 		DEAD = 1;
 	}
 
-	required Status status = 4 [default = ALIVE];
+	required Status status = 5 [default = ALIVE];
 }
 
 message Block {
 	required string name = 1;
-	optional string content = 2;
-	optional double bytes = 3;
-	optional string location = 4;
-	repeated DataNode datanodes = 5;
-	optional double timestamp = 6;
+	optional int32 replicas = 2;
+	optional string content = 3;
+	optional double bytes = 4;
+	optional string location = 5;
+	repeated DataNode datanodes = 6;
+	optional double timestamp = 7;
 
 	enum Status {
 		ALIVE = 0;
 		DEAD = 1;
 	}
 
-	optional Status status = 7 [default = ALIVE];
+	optional Status status = 8 [default = ALIVE];
 }
 
 message Result_File {
