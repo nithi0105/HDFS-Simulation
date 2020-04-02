@@ -1,5 +1,8 @@
 package ds.hdfs;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -13,11 +16,10 @@ import com.google.protobuf.ByteString;
 import ds.hdfs.INameNode;
 import ds.hdfs.HdfsDefn.Block;
 import ds.hdfs.IDataNode;
-import java.util.TimerTask;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.Properties;
 
 
 public class Client
@@ -29,57 +31,62 @@ public class Client
     {
         //Get the Name Node Stub
         //nn_details contain NN details in the format Server;IP;Port
-        String [] params = readConfig(getFilePath("nn_config.txt"));
+        String [] params = this.readConfig(this.getFilePath("nn_config.txt").getPath());
         //String name = params[0];
         String IP = params[1];
         int port = Integer.valueOf(params[2]);
     	this.NNStub = GetNNStub("INameNode", IP, port); //get parameters from config
     }
 
-    public int getValuefromConfig(String name){
-        try(Reader reader = Files.newBufferedReader(Path.get("config.properties"), StandardCharsets.UTF_8)) {
-        Properties properties = new Properties();
-        properties.load(reader);
-        int value = Integer.valueOf(properties.getProperty(name));
-        return value;   
+	public int getValuefromConfig(String name){
+        int value = 0;
+		try(Reader reader = Files.newBufferedReader(Paths.get("config.properties"), StandardCharsets.UTF_8)) {
+			Properties properties = new Properties();
+			properties.load(reader);
+			value = Integer.valueOf(properties.getProperty(name));
+			return value;   
         }catch(Exception e){
             System.out.println("Could not load value");
-            continue;
+            
         }
+        return value;
     }
 
-    public String[] readConfig(File filename){
+    public String[] readConfig(String filename){
         BufferedReader objReader = null;
+        String [] config_split = null;
         try {
             String strCurrentLine;
 
             objReader = new BufferedReader(new FileReader(filename));
 
             while ((strCurrentLine = objReader.readLine()) != null) {
-            ArrayList<String> configDetails = new ArrayList<String>();
-            configDetails.add(strCurrentLine);
-    	    if(configDetails.size()>0) {
-    		String to_split = configDetails[0];
-    		String[] config_split = to_split.split(";");
-            //System.out.println(strCurrentLine);
-        }
+                ArrayList<String> configDetails = new ArrayList<String>();
+                configDetails.add(strCurrentLine);
+        	    if(configDetails.size()>0) {
+        		String to_split = configDetails.get(0);
+        		config_split = to_split.split(";");
+                //System.out.println(strCurrentLine);	
+        	    }
+    	    }
             return config_split;
+
         } catch (IOException e) {
 
             e.printStackTrace();
 
         } finally {
 
-        try {
-            if (objReader != null)
-            objReader.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+	        try {
+	            if (objReader != null)
+	            objReader.close();
+	        } catch (IOException ex) {
+	            ex.printStackTrace();
+	        }
         }
-        }
-        
-    }
-    }
+		return config_split;
+    	
+	}
 
     public File getFilePath(String filename){
         String filepath = "";
@@ -88,8 +95,8 @@ public class Client
         if(new File(filename).isAbsolute()){
             f = new File(filename);
         } else{
-            filePath = new File("").getAbsolutePath();
-            appendFile = filePath + "/" + filename;
+            filepath = new File("").getAbsolutePath();
+            appendFile = filepath + "/" + filename;
             f = new File(appendFile);
         }
         return f;
@@ -134,7 +141,7 @@ public class Client
         BufferedInputStream bis;
         HdfsDefn.File.Builder sendFile = HdfsDefn.File.newBuilder();
         try{
-            String [] params = readConfig(getFilePath("dn_config.txt"));
+            String [] params = this.readConfig(this.getFilePath("dn_config.txt").getPath());
             //from config file
             String name = params[0];
             String IP = params[1];
@@ -171,7 +178,7 @@ public class Client
         BufferedInputStream bis;
         HdfsDefn.File.Builder sendFile = HdfsDefn.File.newBuilder();
         try{
-            String [] params = readConfig(getFilePath("dn_config.txt"));
+            String [] params = this.readConfig(this.getFilePath("dn_config.txt").getPath());
             //from config file
             String name = params[0];
             String IP = params[1];
