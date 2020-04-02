@@ -413,9 +413,9 @@ public class NameNode implements INameNode{
 	    serverRegistry = LocateRegistry.createRegistry(2007);
 	    serverRegistry.bind("INameNode", stub);
         System.err.println("Server ready");
-            
+        int blockReportInterval = getValuefromConfig("blockReportInterval")    
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(obj.blockRunnable, 0, 3, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(obj.blockRunnable, 0, blockReportInterval, TimeUnit.SECONDS);
             
             /*Thread tobj = new Thread(obj);
             tobj.start();*/
