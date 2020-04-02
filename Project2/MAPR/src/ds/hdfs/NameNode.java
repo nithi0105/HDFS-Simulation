@@ -354,11 +354,11 @@ public class NameNode implements INameNode{
         }
     }
 
-    public String[] readConfig(String filename){
+    public String[] readConfig(File filename){
         BufferedReader objReader = null;
         try {
             String strCurrentLine;
-			String [] config_split;
+	    String [] config_split;
 
             objReader = new BufferedReader(new FileReader(filename));
 
