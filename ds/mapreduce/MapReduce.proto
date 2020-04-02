@@ -1,0 +1,5 @@
+package mapreduce;
+
+option java_package = "ds.mapreduce";
+option java_outer_classname = "maprformat";
+
