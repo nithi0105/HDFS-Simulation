@@ -179,10 +179,10 @@ public class NameNode implements INameNode{
 			retFile.setName(f.getName());
 			
 	        //file size/block size = # of blocks to a file -- replication factor is 2
-			int replicaFactor = 2;
+			int replicaFactor = getValuefromConfig("factor");
 			int replicaCount = 0;
 			long fileSize = new File(f.getName()).length();
-			long blockSize = 64; //make configurable (read config)
+			long blockSize = Long.valueOf(getValuefromConfig("blockBytes")); //make configurable (read config)
 			long numBlocks = (long) Math.ceil(fileSize/blockSize);
 			ArrayList<HdfsDefn.DataNode> dnList = (ArrayList<HdfsDefn.DataNode>) fileDn.getDatanodeList();
 			Random randomizer = new Random();
@@ -342,40 +342,85 @@ public class NameNode implements INameNode{
 		}
 	};
 	
+	public int getValuefromConfig(String name){
+        try(Reader reader = Files.newBufferedReader(Path.get("config.properties"), StandardCharsets.UTF_8)) {
+			Properties properties = new Properties();
+			properties.load(reader);
+			int value = Integer.valueOf(properties.getProperty(name));
+			return value;   
+        }catch(Exception e){
+            System.out.println("Could not load value");
+            continue;
+        }
+    }
+
+    public String[] readConfig(String filename){
+        BufferedReader objReader = null;
+        try {
+            String strCurrentLine;
+			String [] config_split;
+
+            objReader = new BufferedReader(new FileReader(filename));
+
+            while ((strCurrentLine = objReader.readLine()) != null) {
+            ArrayList<String> configDetails = new ArrayList<String>();
+            configDetails.add(strCurrentLine);
+    	    if(configDetails.size()>0) {
+    		String to_split = configDetails[0];
+    		config_split = to_split.split(";");
+            //System.out.println(strCurrentLine);			
+        }
+			return config_split;
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+        try {
+            if (objReader != null)
+            objReader.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        }
+    	}
+	}
+
+    public File getFilePath(String filename){
+        String filepath = "";
+        String appendFile = "";
+        File f = null;
+        if(new File(filename).isAbsolute()){
+            f = new File(filename);
+        } else{
+            filePath = new File("").getAbsolutePath();
+            appendFile = filePath + "/" + filename;
+            f = new File(appendFile);
+        }
+        return f;
+    }
+
 	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
 	{
-		String name = "";
-		String ip = "";
-		int port = 0;
-		try (BufferedReader br = new BufferedReader(new FileReader("nn_config.txt"))) {
-			String line = br.readLine();
-			String[] params = line.split(";");
-			
-			name = params[0];
-			ip = params[1];
-			port = Integer.valueOf(params[2]);
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		String [] params = readConfig(getFilePath("nn_config.txt"));
+		String name = params[0];
+		String ip = params[1];
+		int port = Integer.valueOf(params[2]);
 		
-        try {
-	        NameNode obj = new NameNode(ip, port, "INameNode");
-	        INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
-	        serverRegistry = LocateRegistry.createRegistry(2007);
-	        serverRegistry.bind("INameNode", stub);
-            System.err.println("Server ready");
+	    NameNode obj = new NameNode(ip, port, "INameNode");
+	    INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
+	    serverRegistry = LocateRegistry.createRegistry(2007);
+	    serverRegistry.bind("INameNode", stub);
+        System.err.println("Server ready");
             
-            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            executor.scheduleAtFixedRate(obj.blockRunnable, 0, 3, TimeUnit.SECONDS);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(obj.blockRunnable, 0, 3, TimeUnit.SECONDS);
             
             /*Thread tobj = new Thread(obj);
             tobj.start();*/
             
-        } catch (Exception e) {
-            System.err.println("Server exception: " + e.toString());
-            e.printStackTrace();
-        }
+        
 	}
 	
 }
