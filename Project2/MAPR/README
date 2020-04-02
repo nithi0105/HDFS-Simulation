@@ -1,0 +1,12 @@
+Config files: 
+
+dn_config.txt: 
+Format of entries is: Name;IP;Port (separated by semi-colons and no spaces in between)
+- For now we only have it working with one Datanode in the config file
+
+nn_config.txt:
+Format of entries is: Name;IP;Port (separated by semi-colons and no spaces in between)
+- In the java files, we have default set the name of NameNode as "INameNode" so the name in the config file does not matter
+
+config.properties: all the configurable entities that include heart beat interval, block size in bytes, replication factor, and block report interval
+- only the numbers need to be changed
