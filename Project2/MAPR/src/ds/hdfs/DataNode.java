@@ -157,7 +157,7 @@ public class DataNode implements IDataNode
         return f;
     }
 
-    public String[] readConfig(String filename){
+    public String[] readConfig(File filename){
         BufferedReader objReader = null;
         try {
             String strCurrentLine;
@@ -202,7 +202,7 @@ public class DataNode implements IDataNode
     }
 
 
-    public INameNode GetNNStub(String Name, String filename)
+    public INameNode GetNNStub(String Name, File filename)
     {
         while(true)
         {
