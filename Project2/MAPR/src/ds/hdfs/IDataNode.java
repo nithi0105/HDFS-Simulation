@@ -8,5 +8,7 @@ public interface IDataNode extends Remote{
 	byte[] readBlock(byte[] inp) throws RemoteException;
 	
 	/* Method to write data to a specific block */
-	byte[] writeBlock(byte[] inp) throws RemoteException;	
+	byte[] writeBlock(byte[] inp) throws RemoteException;
+
+	byte[] heartBeat(byte[] inp ) throws RemoteException;	
 }
