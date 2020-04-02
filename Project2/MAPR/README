@@ -1,3 +1,14 @@
+CS417: Distributed Systems Project 2
+
+Tools and dependencies:
+- Apache Maven v3.6.0
+- Java Protocol Buffers v3.11.3
+
+Cluster Setup:
+- namenode: kill.cs.rutgers.edu
+- datanode 1: cp.cs.rutgers.edu
+- client: ls.cs.rutgers.edu
+
 Config files: 
 
 dn_config.txt: 
@@ -10,3 +21,22 @@ Format of entries is: Name;IP;Port (separated by semi-colons and no spaces in be
 
 config.properties: all the configurable entities that include heart beat interval, block size in bytes, replication factor, and block report interval
 - only the numbers need to be changed
+
+NameNode.java methods:
+- openfile(byte[]) given a Hdfs.File from protobuf, reads file name input and returns a file descriptor
+- getBlockLocations(byte[]) given a Hdfs.File from protobuf, finds the file name in file_protobuf and returns a list of datanodes
+- assignBlock(byte[]) given a Hdfs.File from protobuf, finds the file's datanode list in dn_protobuf, creates blocks based on file size and block size, asigns a random + alive datanode to the new block, and returns file with the blocks with datanode locations
+- list(byte[]) lists all files in file_protobuf
+- blockReport(byte[])
+- heartBeat(byte[])
+
+How to compile and run the code:
+In /Project2_ggc43_nk598/Project2/MAPR/:
+1. run Makefile with 'make'
+In /Project2_ggc43_nk598/Project2/MAPR/src/:
+2. input 'rmiregistry &' on NameNode
+3. start the NameNode server with 'java -cp project2-0.0.1-SNAPSHOT-jar-with-dependencies.jar ds.hdfs.NameNode'
+4. input 'rmiregistry &' on DataNode
+5. start the DataNode server with 'java -cp project2-0.0.1-SNAPSHOT-jar-with-dependencies.jar ds.hdfs.DataNode'
+6. start the Client 'java -cp project2-0.0.1-SNAPSHOT-jar-with-dependencies.jar ds.hdfs.Client'
+- use 'put local_file hdfs_file' or 'get hdfs_file local_file' or 'list'
