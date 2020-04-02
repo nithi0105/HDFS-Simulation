@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.ByteString;
@@ -17,6 +18,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 //import ds.hdfs.hdfsformat.*;
 import ds.hdfs.IDataNode.*;
@@ -56,7 +60,7 @@ public class DataNode implements IDataNode
             //response.setStatus(-1);
         }
 
-        return retFile.build().toByteArray()
+        return retFile.build().toByteArray();
     }
 
     public byte[] writeBlock(byte[] Inp)
@@ -118,11 +122,11 @@ public class DataNode implements IDataNode
     {
     }
 
-    public byte [] heartBeat(String name, String IP, int port) throws RemoteException{
-        HdfsDefn.dataNode.Builder response = HdfsDefn.dataNode.newBuilder();
-        response.setSName = name;
-        response.setAddress = IP;
-        response.setPort = port;
+    public byte[] heartBeat(String name, String IP, int port) throws RemoteException{
+        HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
+        response.setSName(name);
+        response.setAddress(IP);
+        response.setPort(port);
         response.setStatus(HdfsDefn.DataNode.Status.ALIVE);
         return response.build().toByteArray();
     }
@@ -143,6 +147,56 @@ public class DataNode implements IDataNode
         }
     }
 
+	public int getValuefromConfig(String name){
+        int value = 0;
+		try(Reader reader = Files.newBufferedReader(Paths.get("config.properties"), StandardCharsets.UTF_8)) {
+			Properties properties = new Properties();
+			properties.load(reader);
+			value = Integer.valueOf(properties.getProperty(name));
+			return value;   
+        }catch(Exception e){
+            System.out.println("Could not load value");
+            
+        }
+        return value;
+    }
+
+    public String[] readConfig(File filename){
+        BufferedReader objReader = null;
+        String [] config_split = null;
+        try {
+            String strCurrentLine;
+
+            objReader = new BufferedReader(new FileReader(filename));
+
+            while ((strCurrentLine = objReader.readLine()) != null) {
+                ArrayList<String> configDetails = new ArrayList<String>();
+                configDetails.add(strCurrentLine);
+        	    if(configDetails.size()>0) {
+        		String to_split = configDetails.get(0);
+        		config_split = to_split.split(";");
+                //System.out.println(strCurrentLine);	
+        	    }
+    	    }
+            return config_split;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+	        try {
+	            if (objReader != null)
+	            objReader.close();
+	        } catch (IOException ex) {
+	            ex.printStackTrace();
+	        }
+        }
+		return config_split;
+    	
+	}
+
     public File getFilePath(String filename){
         String filepath = "";
         String appendFile = "";
@@ -150,55 +204,11 @@ public class DataNode implements IDataNode
         if(new File(filename).isAbsolute()){
             f = new File(filename);
         } else{
-            filePath = new File("").getAbsolutePath();
-            appendFile = filePath + "/" + filename;
+            filepath = new File("").getAbsolutePath();
+            appendFile = filepath + "/" + filename;
             f = new File(appendFile);
         }
         return f;
-    }
-
-    public String[] readConfig(File filename){
-        BufferedReader objReader = null;
-        try {
-            String strCurrentLine;
-            String [] config_split;
-            objReader = new BufferedReader(new FileReader(filename));
-
-            while ((strCurrentLine = objReader.readLine()) != null) {
-            ArrayList<String> configDetails = new ArrayList<String>();
-            configDetails.add(strCurrentLine);
-    	    if(configDetails.size()>0) {
-    		String to_split = configDetails[0];
-    		config_split = to_split.split(";");
-            //System.out.println(strCurrentLine);
-        }
-            return config_split;
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-        } finally {
-
-        try {
-            if (objReader != null)
-            objReader.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        }  
-        }
-    }
-
-    public int getValuefromConfig(String name){
-        try(Reader reader = Files.newBufferedReader(Path.get("config.properties"), StandardCharsets.UTF_8)) {
-			Properties properties = new Properties();
-			properties.load(reader);
-			int value = Integer.valueOf(properties.getProperty(name));
-			return value;   
-        }catch(Exception e){
-            System.out.println("Could not load value");
-            continue;
-        }
     }
 
 
@@ -208,7 +218,7 @@ public class DataNode implements IDataNode
         {
             try
             {
-                String [] config_split = readConfig(filename);
+                String [] config_split = this.readConfig(filename);
                 //String Name = config_split[0];
                 String IP = config_split[1];
                 int Port = Integer.valueOf(config_split[2]);
@@ -245,21 +255,28 @@ public class DataNode implements IDataNode
     public static void main(String args[]) throws InvalidProtocolBufferException, IOException
     {
         //Define a Datanode Me
-        String [] params = readConfig(getFilePath("dn_config.txt"));
+    	DataNode Me = null;
+        String [] params = Me.readConfig(Me.getFilePath("dn_config.txt"));
         String name = params[0];
         String IP = params[1];
         int port = Integer.valueOf(params[2]);
-        DataNode Me = new DataNode(name, port, IP);
+        Me = new DataNode(name, port, IP);
         //DataNode Me = new DataNode("cp", 2005, "128.6.13.177"); //get from dn config?
         //INameNode stub = Me.GetNNStub("INameNode", "128.6.13.175", 2007);
-        INameNode stub = Me.GetNNStub("INameNode", getFilePath("nn_config.txt")); //get from nn config?
+        INameNode stub = Me.GetNNStub("INameNode", Me.getFilePath("nn_config.txt")); //get from nn config?
         Me.NNStub = stub;
-        int heartBeatTime = getValuefromConfig("heartBeatTime");
+        int heartBeatTime = Me.getValuefromConfig("heartBeatTime");
         Me.BindServer("IDataNode", IP, port); //get from config
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        
+        final DataNode dn = Me;
         executor.scheduleAtFixedRate(new Runnable() {
             public void run() {
-                    heartBeat(Me.MyName, Me.MyPort, Me.MyIP);
+                    try {
+						dn.heartBeat(dn.MyName, dn.MyIP, dn.MyPort);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
                 }
 	    }, 0, heartBeatTime, TimeUnit.SECONDS);
     }
