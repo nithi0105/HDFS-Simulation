@@ -48,7 +48,7 @@ public class Client
         }
     }
 
-    public String[] readConfig(String filename){
+    public String[] readConfig(File filename){
         BufferedReader objReader = null;
         try {
             String strCurrentLine;
