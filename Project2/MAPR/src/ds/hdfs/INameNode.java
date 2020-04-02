@@ -7,7 +7,7 @@ public interface INameNode extends Remote{
 	/* Method to open a file given file name with read-write flag*/
 	byte[] openFile(byte[] inp) throws RemoteException;
 	
-	byte[] closeFile(byte[] inp ) throws RemoteException;
+	//byte[] closeFile(byte[] inp ) throws RemoteException;
 	
 	/* Method to get block locations given an array of block numbers */
 	byte[] getBlockLocations(byte[] inp ) throws RemoteException;
