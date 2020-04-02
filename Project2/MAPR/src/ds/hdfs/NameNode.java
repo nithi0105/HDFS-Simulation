@@ -13,7 +13,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -26,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -281,7 +287,7 @@ public class NameNode implements INameNode{
 		
 			try {
 				HdfsDefn.DataNode dd = HdfsDefn.DataNode.parseFrom(inp);
-				response.setId(dd.getId()); //ipaddress  (read config?)
+				response.setSName(dd.getSName()); //ipaddress  (read config?)
 				//response.setReplicas(dd.getReplicas());
 				response.setStatus(HdfsDefn.DataNode.Status.ALIVE);
 				response.setTimestamp(dd.getTimestamp());
@@ -289,7 +295,7 @@ public class NameNode implements INameNode{
 				try {
 					HdfsDefn.Result_DataNode fileDn = HdfsDefn.Result_DataNode.parseFrom(new FileInputStream("dn_protobuf"));
 					for(HdfsDefn.DataNode dn : fileDn.getDatanodeList()) {
-						if(dd.getId().equals(dn.getId())) {
+						if(dd.getSName().equals(dn.getSName())) {
 							//datanode already in file
 							return response.build().toByteArray();
 						}
@@ -343,48 +349,53 @@ public class NameNode implements INameNode{
 	};
 	
 	public int getValuefromConfig(String name){
-        try(Reader reader = Files.newBufferedReader(Path.get("config.properties"), StandardCharsets.UTF_8)) {
+        int value = 0;
+		try(Reader reader = Files.newBufferedReader(Paths.get("config.properties"), StandardCharsets.UTF_8)) {
 			Properties properties = new Properties();
 			properties.load(reader);
-			int value = Integer.valueOf(properties.getProperty(name));
+			value = Integer.valueOf(properties.getProperty(name));
 			return value;   
         }catch(Exception e){
             System.out.println("Could not load value");
-            continue;
+            
         }
+        return value;
     }
 
-    public String[] readConfig(File filename){
+    public String[] readConfig(String filename){
         BufferedReader objReader = null;
+        String [] config_split = null;
         try {
             String strCurrentLine;
-	    String [] config_split;
 
             objReader = new BufferedReader(new FileReader(filename));
 
             while ((strCurrentLine = objReader.readLine()) != null) {
-            ArrayList<String> configDetails = new ArrayList<String>();
-            configDetails.add(strCurrentLine);
-    	    if(configDetails.size()>0) {
-    		String to_split = configDetails[0];
-    		config_split = to_split.split(";");
-            //System.out.println(strCurrentLine);			
-        }
-			return config_split;
+                ArrayList<String> configDetails = new ArrayList<String>();
+                configDetails.add(strCurrentLine);
+        	    if(configDetails.size()>0) {
+        		String to_split = configDetails.get(0);
+        		config_split = to_split.split(";");
+                //System.out.println(strCurrentLine);	
+        	    }
+    	    }
+            return config_split;
+
         } catch (IOException e) {
 
             e.printStackTrace();
 
         } finally {
 
-        try {
-            if (objReader != null)
-            objReader.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+	        try {
+	            if (objReader != null)
+	            objReader.close();
+	        } catch (IOException ex) {
+	            ex.printStackTrace();
+	        }
         }
-        }
-    	}
+		return config_split;
+    	
 	}
 
     public File getFilePath(String filename){
@@ -394,8 +405,8 @@ public class NameNode implements INameNode{
         if(new File(filename).isAbsolute()){
             f = new File(filename);
         } else{
-            filePath = new File("").getAbsolutePath();
-            appendFile = filePath + "/" + filename;
+            filepath = new File("").getAbsolutePath();
+            appendFile = filepath + "/" + filename;
             f = new File(appendFile);
         }
         return f;
@@ -403,17 +414,25 @@ public class NameNode implements INameNode{
 
 	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
 	{
-		String [] params = readConfig(getFilePath("nn_config.txt"));
+		
+	    NameNode obj = null;
+		String [] params = obj.readConfig(obj.getFilePath("nn_config.txt").getPath());
 		String name = params[0];
 		String ip = params[1];
 		int port = Integer.valueOf(params[2]);
 		
-	    NameNode obj = new NameNode(ip, port, "INameNode");
+		obj.ip = ip;
+		obj.port = port;
+		obj.name = name;
 	    INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
-	    serverRegistry = LocateRegistry.createRegistry(2007);
-	    serverRegistry.bind("INameNode", stub);
+	    serverRegistry = LocateRegistry.createRegistry(port);
+	    try {
+			serverRegistry.bind("INameNode", stub);
+		} catch (AlreadyBoundException e) {
+			e.printStackTrace();
+		}
         System.err.println("Server ready");
-        int blockReportInterval = getValuefromConfig("blockReportInterval")    
+        int blockReportInterval = obj.getValuefromConfig("blockReportInterval");    
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(obj.blockRunnable, 0, blockReportInterval, TimeUnit.SECONDS);
             
