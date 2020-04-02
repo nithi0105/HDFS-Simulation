@@ -62,7 +62,6 @@ public class Client
     public void PutFile(String Filename) //Put File
     {
         System.out.println("Going to put file " + Filename);
-        BufferedInputStream bis;
         HdfsDefn.File.Builder sendFile = HdfsDefn.File.newBuilder();
         try{
         	DataNode dn = new DataNode("cp", 2005, "128.6.13.177"); //get from config
@@ -71,7 +70,6 @@ public class Client
         	
         	byte[] open = this.NNStub.openFile(sendFile.build().toByteArray());
         	HdfsDefn.File parseOpen = HdfsDefn.File.parseFrom(open);
-        	bis = new BufferedInputStream(new FileInputStream(String.valueOf(parseOpen.getHandle())));
         	
         	//returns file message with blocks and assigned datanodes
         	byte[] byteAssign = this.NNStub.assignBlock(sendFile.build().toByteArray());
@@ -79,43 +77,11 @@ public class Client
         	HdfsDefn.File parseFile = HdfsDefn.File.parseFrom(byteAssign);
         	HdfsDefn.File.Builder buildFile = HdfsDefn.File.newBuilder(parseFile);
 			
+        	buildFile.setHandle(parseOpen.getHandle());
         	
-        	int numByte = bis.available();
-        	int blockBytes = 64; //configurable
-        	int start = 0;
+        	//writes file content into blocks
+        	writeDn.writeBlock(buildFile.build().toByteArray());
         	
-        	int index = 0;
-			for(HdfsDefn.Block block : buildFile.getChunksList()) {
-				HdfsDefn.Block.Builder chunk = HdfsDefn.Block.newBuilder();
-				
-	        	byte[] content = new byte[numByte];
-	        	bis.read(content, start, blockBytes);
-	        	start = blockBytes+1;
-	        	String str = new String(content, "UTF-8");
-	        	
-				chunk.setName(block.getName());
-				chunk.addAllDatanodes(block.getDatanodesList());
-				chunk.setContent(str);
-				
-				//given a chunk with data, return the chunk with datanodes with data
-				byte[] response = writeDn.writeBlock(chunk.build().toByteArray());
-				HdfsDefn.Block parseChunk = HdfsDefn.Block.parseFrom(response);
-				buildFile.setChunks(index, parseChunk);
-				index++;
-			}
-        	
-			//add file to proto file
-        	HdfsDefn.File result = buildFile.build();
-			try {
-				FileOutputStream output = new FileOutputStream("file_protobuf", true);
-				result.writeTo(output);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-        	bis.close();
         }catch(Exception e){
             System.out.println("File not found !!!");
             return;
@@ -134,7 +100,7 @@ public class Client
         	
         	byte[] open = this.NNStub.openFile(sendFile.build().toByteArray());
         	HdfsDefn.File parseOpen = HdfsDefn.File.parseFrom(open);
-        	bis = new BufferedInputStream(new FileInputStream(String.valueOf(parseOpen.getHandle())));
+        	
         	
 			HdfsDefn.Result_File resFile = HdfsDefn.Result_File.parseFrom(new FileInputStream("file_protobuf"));
 			HdfsDefn.Result_Block.Builder response = HdfsDefn.Result_Block.newBuilder();
@@ -148,12 +114,8 @@ public class Client
 			
 			//returns datanode list
         	byte[] byteLocations = this.NNStub.getBlockLocations(response.build().toByteArray());
-        	HdfsDefn.Result_DataNode parseResponse = HdfsDefn.Result_DataNode.parseFrom(byteLocations);
-        	for(HdfsDefn.DataNode datanode : parseResponse.getDatanodeList()) {
-        		writeDn.readBlock(datanode.toByteArray());
-        		//write to local file
-        	}
-        	bis.close();
+        	writeDn.readBlock(byteLocations);
+        	
         }catch(Exception e){
             System.out.println("File not found !!!");
             return;
