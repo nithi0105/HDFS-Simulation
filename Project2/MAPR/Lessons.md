@@ -1,8 +1,5 @@
-what you learnt, what you implemented, pseudo code
 
-This project really opened our eyes to the architecture of the Hadoop Distributed File System. We really got to see all the internal components that go into storing files on a system and sending it back to the user (where the user typically does not see this internal processes).
-
-We used Java rmi for server/client connection 
+This project really opened our eyes to the architecture of the Hadoop Distributed File System. We really got to see all the internal components that go into storing files on a system and sending it back to the user (where the user typically does not see this internal processes). Previously, we had not built a system with so many components that had to communicate with eachother so we really got to understand Java rmi. 
 
 Implemented: (Gianna Cortes worked on NameNode and Client, Nithi Kumar worked on DataNode and Client)
 -The use of configurable files to change parameters.
