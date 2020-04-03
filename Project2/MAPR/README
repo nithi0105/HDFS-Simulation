@@ -30,6 +30,11 @@ NameNode.java methods:
 - blockReport(byte[])
 - heartBeat(byte[])
 
+DataNode.java methods: 
+- readblock(byte[]): given a datanode, writes the content into a local file (not complete)
+- writeblock(byte[]): given block of content, writes into datanode chunk
+- heartBeat(String, String, int): sends name, ip, and port as byte array with heartBeat time interval (configurable)
+
 How to compile and run the code:
 In /Project2_ggc43_nk598/Project2/MAPR/:
 1. run Makefile with 'make'
