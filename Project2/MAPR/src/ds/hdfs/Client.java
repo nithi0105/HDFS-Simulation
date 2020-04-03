@@ -234,6 +234,18 @@ public class Client
 
     public void List()
     {
+	    /*BufferedReader objReader = null;
+            try {
+            String strCurrentLine;
+            objReader = new BufferedReader(new FileReader("file_protobuf"));
+            while ((strCurrentLine = objReader.readLine()) != null) {
+	    	String [] contents_split = strCurrentLine.split(":");
+		
+		//filename is contents_split[0];
+		System.out.println(contents_split[0]);
+	    */
+         
+	    System.out.println("These are the files in the system: ");
     }
 
     public static void main(String[] args) throws RemoteException, UnknownHostException
