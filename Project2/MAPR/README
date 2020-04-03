@@ -28,8 +28,8 @@ NameNode.java methods:
 - getBlockLocations(byte[]) given a Hdfs.File from protobuf, finds the file name in file_protobuf and returns a list of datanodes
 - assignBlock(byte[]) given a Hdfs.File from protobuf, finds the file's datanode list in dn_protobuf, creates blocks based on file size and block size, asigns a random + alive datanode to the new block, and returns file with the blocks with datanode locations
 - list(byte[]) lists all files in file_protobuf
-- blockReport(byte[])
-- heartBeat(byte[])
+- blockReport(byte[]): sends a block report to DataNode
+- heartBeat(byte[]): receives DataNode heartBeat message
 
 DataNode.java methods: 
 - readblock(byte[]): given a datanode, writes the content into a local file (not complete)
