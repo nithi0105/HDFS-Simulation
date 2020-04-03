@@ -37,7 +37,9 @@ public class Client
         int port = Integer.valueOf(params[2]);
     	this.NNStub = GetNNStub("INameNode", IP, port); //get parameters from config
     }
-
+	
+	//method to access configurable values(heart beat interval, block size, etc.) from "config.properties" 
+	//returns int of value associated with name
 	public int getValuefromConfig(String name){
         int value = 0;
 		try(Reader reader = Files.newBufferedReader(Paths.get("config.properties"), StandardCharsets.UTF_8)) {
@@ -51,8 +53,9 @@ public class Client
         }
         return value;
     }
-
-    public String[] readConfig(String filename){
+	//parses dn_config.txt and nn_config.txt
+	//returns String array with Name, ip, and port
+    	public String[] readConfig(String filename){
         BufferedReader objReader = null;
         String [] config_split = null;
         try {
@@ -87,8 +90,9 @@ public class Client
 		return config_split;
     	
 	}
-
-    public File getFilePath(String filename){
+	
+	//to get file path for dn_config and nn_config
+    	public File getFilePath(String filename){
         String filepath = "";
         String appendFile = "";
         File f = null;
@@ -135,6 +139,7 @@ public class Client
         }
     }
 
+	
     public void PutFile(String Filename) //Put File
     {
         System.out.println("Going to put file " + Filename);
@@ -147,10 +152,10 @@ public class Client
             String IP = params[1];
             int port = Integer.valueOf(params[2]);
             DataNode dn = new DataNode(name, port, IP);
-        	//DataNode dn = new DataNode("cp", 2005, "128.6.13.177"); //get from config
         	IDataNode writeDn = GetDNStub("IDataNode", IP, port); //get from config
         	sendFile.setName(Filename);
         	
+		//calling Name Node method to open the file
             byte[] open = this.NNStub.openFile(sendFile.build().toByteArray());
         	HdfsDefn.File parseOpen = HdfsDefn.File.parseFrom(open);
         	
@@ -162,7 +167,7 @@ public class Client
 			
         	buildFile.setHandle(parseOpen.getHandle());
         	
-        	//writes file content into blocks
+        	//writes file content into blocks (calling DataNode)
         	writeDn.writeBlock(buildFile.build().toByteArray());
         	
         }catch(Exception e){
@@ -188,11 +193,12 @@ public class Client
         	IDataNode writeDn = GetDNStub("IDataNode", IP, port); //get from config
         	//IDataNode writeDn = GetDNStub("IDataNode", "128.6.13.177", 2005); //get parameters from config
         	sendFile.setName(Filename);
-
+		
+		//calls NameNode to open file to put to local
             byte[] open = this.NNStub.openFile(sendFile.build().toByteArray());
         	HdfsDefn.File parseOpen = HdfsDefn.File.parseFrom(open);
         	
-        	
+        		//opens "file_protobuf" (which stores the metadata about the file)
 			HdfsDefn.Result_File resFile = HdfsDefn.Result_File.parseFrom(new FileInputStream("file_protobuf"));
 			HdfsDefn.Result_Block.Builder response = HdfsDefn.Result_Block.newBuilder();
 			ArrayList<HdfsDefn.Block> blockList = null;
@@ -205,8 +211,21 @@ public class Client
 			
 			//returns datanode list
         	byte[] byteLocations = this.NNStub.getBlockLocations(response.build().toByteArray());
-        	writeDn.readBlock(byteLocations);
-        	
+		
+		writeDn.readBlock(byteLocations);
+		//calls datanode method read block 
+        	//byte [] content = writeDn.readBlock(byteLocations);
+		
+		//writes into local file
+		/*BufferedOutputStream bos = null;
+        	FileOutputStream Filename = null;
+		try{
+			fos = new FileOutputStream(Filename);
+            		bos = new BufferedOutputStream(fos);
+            		bos.write(content);
+		} catch{
+			System.out.println("Error while writing to file" + ioe);
+		}*/
         }catch(Exception e){
             System.out.println("File not found !!!");
             return;
