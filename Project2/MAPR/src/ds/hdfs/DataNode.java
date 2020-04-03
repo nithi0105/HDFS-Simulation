@@ -42,16 +42,17 @@ public class DataNode implements IDataNode
     	this.MyPort = storagePort;
         this.MyIP = IP;
     }
-
-    public byte[] readBlock(byte[] Inp)
-    {
+	//method that takes in blocklocation of chunk to read and returns contents of block in byte array
+   	 public byte[] readBlock(byte[] Inp)
+   	 {
         HdfsDefn.File.Builder retFile = HdfsDefn.File.newBuilder();
         try
         {
         	HdfsDefn.File f = HdfsDefn.File.parseFrom(Inp);
         	HdfsDefn.Result_DataNode parseResponse = HdfsDefn.Result_DataNode.parseFrom(Inp);
         	for(HdfsDefn.DataNode datanode : parseResponse.getDatanodeList()) {
-        		//write to local file
+        		//write to return file 
+			//retFile = HdfsDefn.DataNode.Block.content;
         	}
         }
         catch(Exception e)
@@ -62,9 +63,10 @@ public class DataNode implements IDataNode
 
         return retFile.build().toByteArray();
     }
-
-    public byte[] writeBlock(byte[] Inp)
-    {
+	
+	//given a datanode, writes content from file into datanode and returns index of the chunk
+    	public byte[] writeBlock(byte[] Inp)
+    	{
         BufferedInputStream bis;
     	HdfsDefn.File.Builder retFile = HdfsDefn.File.newBuilder();
         try
@@ -118,11 +120,8 @@ public class DataNode implements IDataNode
         return retFile.build().toByteArray();
     }
 
-    public void BlockReport() throws IOException
-    {
-    }
-
-    public byte[] heartBeat(String name, String IP, int port) throws RemoteException{
+	//configures heart Beat message as Name, IP, and port as byte array
+    	public byte[] heartBeat(String name, String IP, int port) throws RemoteException{
         HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
         response.setSName(name);
         response.setAddress(IP);
@@ -146,7 +145,8 @@ public class DataNode implements IDataNode
             e.printStackTrace();
         }
     }
-
+	//method to access configurable variables
+	//given name of variable, returns int of the value
 	public int getValuefromConfig(String name){
         int value = 0;
 		try(Reader reader = Files.newBufferedReader(Paths.get("config.properties"), StandardCharsets.UTF_8)) {
@@ -160,8 +160,8 @@ public class DataNode implements IDataNode
         }
         return value;
     }
-
-    public String[] readConfig(File filename){
+	//method to access parameters from dn_config.txt or nn_config.txt
+    	public String[] readConfig(File filename){
         BufferedReader objReader = null;
         String [] config_split = null;
         try {
@@ -196,8 +196,9 @@ public class DataNode implements IDataNode
 		return config_split;
     	
 	}
-
-    public File getFilePath(String filename){
+	
+	// method to find file path if outside current directory
+    	public File getFilePath(String filename){
         String filepath = "";
         String appendFile = "";
         File f = null;
@@ -269,6 +270,7 @@ public class DataNode implements IDataNode
         Me.BindServer("IDataNode", IP, port); //get from config
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         
+	//thread that sends heart beat specified by heartBeatTime
         final DataNode dn = Me;
         executor.scheduleAtFixedRate(new Runnable() {
             public void run() {
