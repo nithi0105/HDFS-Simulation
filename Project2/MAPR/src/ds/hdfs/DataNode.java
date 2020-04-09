@@ -162,7 +162,7 @@ public class DataNode implements IDataNode
         return value;
     }
 	//method to access parameters from dn_config.txt or nn_config.txt
-    	public String[] readConfig(File filename){
+    	public static String[] readConfig(File filename){
         BufferedReader objReader = null;
         String [] config_split = null;
         try {
@@ -199,7 +199,7 @@ public class DataNode implements IDataNode
 	}
 	
 	// method to find file path if outside current directory
-    	public File getFilePath(String filename){
+    	public static File getFilePath(String filename){
         String filepath = "";
         String appendFile = "";
         File f = null;
@@ -257,15 +257,14 @@ public class DataNode implements IDataNode
     public static void main(String args[]) throws InvalidProtocolBufferException, IOException
     {
         //Define a Datanode Me
-    	DataNode Me = null;
-        String [] params = Me.readConfig(Me.getFilePath("dn_config.txt"));
+        String [] params = readConfig(getFilePath("dn_config.txt"));
         String name = params[0];
         String IP = params[1];
         int port = Integer.valueOf(params[2]);
-        Me = new DataNode(name, port, IP);
+        DataNode Me = new DataNode(name, port, IP);
         //DataNode Me = new DataNode("cp", 2005, "128.6.13.177"); //get from dn config?
         //INameNode stub = Me.GetNNStub("INameNode", "128.6.13.175", 2007);
-        INameNode stub = Me.GetNNStub("INameNode", Me.getFilePath("nn_config.txt")); //get from nn config?
+        INameNode stub = Me.GetNNStub("INameNode", getFilePath("nn_config.txt")); //get from nn config?
         Me.NNStub = stub;
         int heartBeatTime = Me.getValuefromConfig("heartBeatTime");
         Me.BindServer("IDataNode", IP, port); //get from config
@@ -273,7 +272,7 @@ public class DataNode implements IDataNode
         
 	//thread that sends heart beat specified by heartBeatTime
         final DataNode dn = Me;
-        executor.scheduleAtFixedRate(new Runnable() {
+        /*executor.scheduleAtFixedRate(new Runnable() {
             public void run() {
                     try {
 						dn.heartBeat(dn.MyName, dn.MyIP, dn.MyPort);
@@ -281,6 +280,6 @@ public class DataNode implements IDataNode
 						e.printStackTrace();
 					}
                 }
-	    }, 0, heartBeatTime, TimeUnit.SECONDS);
+	    }, 0, heartBeatTime, TimeUnit.SECONDS);*/
     }
 }
