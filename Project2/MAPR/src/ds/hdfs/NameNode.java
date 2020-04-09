@@ -362,7 +362,7 @@ public class NameNode implements INameNode{
         return value;
     }
 
-    public String[] readConfig(String filename){
+    public static String[] readConfig(String filename){
         BufferedReader objReader = null;
         String [] config_split = null;
         try {
@@ -398,7 +398,7 @@ public class NameNode implements INameNode{
     	
 	}
 
-    public File getFilePath(String filename){
+    public static File getFilePath(String filename){
         String filepath = "";
         String appendFile = "";
         File f = null;
@@ -415,15 +415,13 @@ public class NameNode implements INameNode{
 	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
 	{
 		
-	    NameNode obj = null;
-		String [] params = obj.readConfig(obj.getFilePath("nn_config.txt").getPath());
+		String [] params = readConfig(getFilePath("nn_config.txt").getPath());
 		String name = params[0];
 		String ip = params[1];
 		int port = Integer.valueOf(params[2]);
 		
-		obj.ip = ip;
-		obj.port = port;
-		obj.name = name;
+		NameNode obj = new NameNode(ip, port, name);
+		
 	    INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
 	    serverRegistry = LocateRegistry.createRegistry(port);
 	    try {
@@ -434,7 +432,8 @@ public class NameNode implements INameNode{
         System.err.println("Server ready");
         int blockReportInterval = obj.getValuefromConfig("blockReportInterval");    
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(obj.blockRunnable, 0, blockReportInterval, TimeUnit.SECONDS);
+        //thread that receives heart beat
+        //executor.scheduleAtFixedRate(obj.blockRunnable, 0, blockReportInterval, TimeUnit.SECONDS);
             
             /*Thread tobj = new Thread(obj);
             tobj.start();*/
