@@ -239,7 +239,7 @@ public class NameNode implements INameNode{
 	}
 		
 	
-	public byte[] list(byte[] inp ) throws RemoteException
+	public byte[] list() throws RemoteException
 	{
 		//list all files in arraylist (no directory implementation)
 		HdfsDefn.Result_File result = null;
