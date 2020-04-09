@@ -217,14 +217,19 @@ public class Client
         	byte [] content = writeDn.readBlock(byteLocations);
 		
 		//writes into local file
-		try{
-			FileWriter fstream = new FileWriter(Filename,true);
-	  		BufferedWriter out = new BufferedWriter(fstream);
-	  		out.write(content);
-	  		out.close();
-		} catch{
-			System.out.println("Error while writing to file" + ioe);
-		}
+        	FileWriter fstream = new FileWriter(Filename,true);
+        	HdfsDefn.File file = HdfsDefn.File.parseFrom(content);
+    		try{
+    	  		BufferedWriter out = new BufferedWriter(fstream);
+    	  		out.write(file.getContent());
+    	  		out.close();
+    		} catch(Exception e){
+    			System.out.println("Error while writing to file" + e);
+    		} finally {
+    	        if (fstream != null) {
+    	        	fstream.close();
+    	        }
+    		}
         }catch(Exception e){
             System.out.println("File not found !!!");
             return;
@@ -234,7 +239,11 @@ public class Client
     public void List()
     {
 	System.out.println("These are the files in the system: ");
-        this.NNStub.list(); 
+        try {
+			this.NNStub.list();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} 
     }
 
     public static void main(String[] args) throws RemoteException, UnknownHostException
