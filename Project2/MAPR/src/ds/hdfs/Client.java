@@ -212,20 +212,19 @@ public class Client
 			//returns datanode list
         	byte[] byteLocations = this.NNStub.getBlockLocations(response.build().toByteArray());
 		
-		writeDn.readBlock(byteLocations);
+		//writeDn.readBlock(byteLocations);
 		//calls datanode method read block 
-        	//byte [] content = writeDn.readBlock(byteLocations);
+        	byte [] content = writeDn.readBlock(byteLocations);
 		
 		//writes into local file
-		/*BufferedOutputStream bos = null;
-        	FileOutputStream Filename = null;
 		try{
-			fos = new FileOutputStream(Filename);
-            		bos = new BufferedOutputStream(fos);
-            		bos.write(content);
+			FileWriter fstream = new FileWriter(Filename,true);
+	  		BufferedWriter out = new BufferedWriter(fstream);
+	  		out.write(content);
+	  		out.close();
 		} catch{
 			System.out.println("Error while writing to file" + ioe);
-		}*/
+		}
         }catch(Exception e){
             System.out.println("File not found !!!");
             return;
@@ -234,18 +233,8 @@ public class Client
 
     public void List()
     {
-	    /*BufferedReader objReader = null;
-            try {
-            String strCurrentLine;
-            objReader = new BufferedReader(new FileReader("file_protobuf"));
-            while ((strCurrentLine = objReader.readLine()) != null) {
-	    	String [] contents_split = strCurrentLine.split(":");
-		
-		//filename is contents_split[0];
-		System.out.println(contents_split[0]);
-	    */
-         
-	    System.out.println("These are the files in the system: ");
+	System.out.println("These are the files in the system: ");
+        this.NNStub.list(); 
     }
 
     public static void main(String[] args) throws RemoteException, UnknownHostException
