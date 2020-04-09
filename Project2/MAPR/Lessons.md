@@ -15,15 +15,4 @@ Implemented: (Gianna Cortes worked on NameNode and Client, Nithi Kumar worked on
 -DataNode heart beat
 -NameNode block report
 
-List(): (pseudocode) 
- taking file_protobuf that stores metadata about files and their datanodes, we would be able to get a list of all the file names and output to terminal 
- /*BufferedReader objReader = null;
-        try {
-            String strCurrentLine;
-
-            objReader = new BufferedReader(new FileReader(filename));
-
-            while ((strCurrentLine = objReader.readLine()) != null) {
-	    (format of protobuf file is:    file1: dn......)
-	    //split on ":" and take value before the split and output to terminal 
-         */
+In the code there is pseudocode listed in DataNode for readblock() and in the code for Client
