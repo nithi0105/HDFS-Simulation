@@ -9,7 +9,8 @@ message File {
 	required string name = 1;
 	optional int32 handle = 2;
 	optional bool writemode = 3;
-	repeated Block chunks = 4;
+	optional string content = 4;
+	repeated Block chunks = 5;
 
 }
 
