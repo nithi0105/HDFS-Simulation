@@ -52,7 +52,8 @@ public class DataNode implements IDataNode
         	HdfsDefn.Result_DataNode parseResponse = HdfsDefn.Result_DataNode.parseFrom(Inp);
         	for(HdfsDefn.DataNode datanode : parseResponse.getDatanodeList()) {
         		//write to return file 
-			//retFile = HdfsDefn.DataNode.Block.content;
+			retFile.setContent("This is the content of the datanode");
+			
         	}
         }
         catch(Exception e)
