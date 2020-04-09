@@ -23,6 +23,23 @@ config.properties: found in "src/ds/hdfs/"
 - all the configurable entities that include heart beat interval, block size in bytes, replication factor, and block report interval
 - only the numbers need to be changed
 
+Necessary Files: 
+In 'Project2_ggc43_nk598/Project2/MAPR/': 
+- Lessons.md
+- README
+- Makefile
+In 'Project2_ggc43_nk598/Project2/MAPR/src': 
+- ds_config.txt
+- nn_config.txt
+In 'Project2_ggc43_nk598/Project2/MAPR/src/ds/hdfs': 
+- Client.java
+- NameNode.java
+- INameNode.java
+- DataNode.java
+- IDataNode.java
+- config.properties
+- hdfs.proto (where all communication protocols are established)
+
 NameNode.java methods:
 - openfile(byte[]) given a Hdfs.File from protobuf, reads file name input and returns a file descriptor
 - getBlockLocations(byte[]) given a Hdfs.File from protobuf, finds the file name in file_protobuf and returns a list of datanodes
