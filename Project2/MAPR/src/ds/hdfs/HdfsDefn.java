@@ -51,25 +51,39 @@ public final class HdfsDefn {
     boolean getWritemode();
 
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>optional string content = 4;</code>
+     */
+    boolean hasContent();
+    /**
+     * <code>optional string content = 4;</code>
+     */
+    java.lang.String getContent();
+    /**
+     * <code>optional string content = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getContentBytes();
+
+    /**
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     java.util.List<ds.hdfs.HdfsDefn.Block> 
         getChunksList();
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     ds.hdfs.HdfsDefn.Block getChunks(int index);
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     int getChunksCount();
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     java.util.List<? extends ds.hdfs.HdfsDefn.BlockOrBuilder> 
         getChunksOrBuilderList();
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     ds.hdfs.HdfsDefn.BlockOrBuilder getChunksOrBuilder(
         int index);
@@ -90,6 +104,7 @@ public final class HdfsDefn {
       name_ = "";
       handle_ = 0;
       writemode_ = false;
+      content_ = "";
       chunks_ = java.util.Collections.emptyList();
     }
 
@@ -134,9 +149,15 @@ public final class HdfsDefn {
               break;
             }
             case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000008;
+              content_ = bs;
+              break;
+            }
+            case 42: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
                 chunks_ = new java.util.ArrayList<ds.hdfs.HdfsDefn.Block>();
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000010;
               }
               chunks_.add(
                   input.readMessage(ds.hdfs.HdfsDefn.Block.PARSER, extensionRegistry));
@@ -157,7 +178,7 @@ public final class HdfsDefn {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
           chunks_ = java.util.Collections.unmodifiableList(chunks_);
         }
         this.unknownFields = unknownFields.build();
@@ -250,35 +271,77 @@ public final class HdfsDefn {
       return writemode_;
     }
 
-    public static final int CHUNKS_FIELD_NUMBER = 4;
+    public static final int CONTENT_FIELD_NUMBER = 4;
+    private volatile java.lang.Object content_;
+    /**
+     * <code>optional string content = 4;</code>
+     */
+    public boolean hasContent() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional string content = 4;</code>
+     */
+    public java.lang.String getContent() {
+      java.lang.Object ref = content_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          content_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string content = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getContentBytes() {
+      java.lang.Object ref = content_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        content_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CHUNKS_FIELD_NUMBER = 5;
     private java.util.List<ds.hdfs.HdfsDefn.Block> chunks_;
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     public java.util.List<ds.hdfs.HdfsDefn.Block> getChunksList() {
       return chunks_;
     }
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     public java.util.List<? extends ds.hdfs.HdfsDefn.BlockOrBuilder> 
         getChunksOrBuilderList() {
       return chunks_;
     }
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     public int getChunksCount() {
       return chunks_.size();
     }
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     public ds.hdfs.HdfsDefn.Block getChunks(int index) {
       return chunks_.get(index);
     }
     /**
-     * <code>repeated .hdfs.Block chunks = 4;</code>
+     * <code>repeated .hdfs.Block chunks = 5;</code>
      */
     public ds.hdfs.HdfsDefn.BlockOrBuilder getChunksOrBuilder(
         int index) {
@@ -318,8 +381,11 @@ public final class HdfsDefn {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBool(3, writemode_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, content_);
+      }
       for (int i = 0; i < chunks_.size(); i++) {
-        output.writeMessage(4, chunks_.get(i));
+        output.writeMessage(5, chunks_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -341,9 +407,12 @@ public final class HdfsDefn {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, writemode_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, content_);
+      }
       for (int i = 0; i < chunks_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, chunks_.get(i));
+          .computeMessageSize(5, chunks_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -376,6 +445,11 @@ public final class HdfsDefn {
         result = result && (getWritemode()
             == other.getWritemode());
       }
+      result = result && (hasContent() == other.hasContent());
+      if (hasContent()) {
+        result = result && getContent()
+            .equals(other.getContent());
+      }
       result = result && getChunksList()
           .equals(other.getChunksList());
       result = result && unknownFields.equals(other.unknownFields);
@@ -401,6 +475,10 @@ public final class HdfsDefn {
         hash = (37 * hash) + WRITEMODE_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getWritemode());
+      }
+      if (hasContent()) {
+        hash = (37 * hash) + CONTENT_FIELD_NUMBER;
+        hash = (53 * hash) + getContent().hashCode();
       }
       if (getChunksCount() > 0) {
         hash = (37 * hash) + CHUNKS_FIELD_NUMBER;
@@ -546,9 +624,11 @@ public final class HdfsDefn {
         bitField0_ = (bitField0_ & ~0x00000002);
         writemode_ = false;
         bitField0_ = (bitField0_ & ~0x00000004);
+        content_ = "";
+        bitField0_ = (bitField0_ & ~0x00000008);
         if (chunksBuilder_ == null) {
           chunks_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
           chunksBuilder_.clear();
         }
@@ -592,10 +672,14 @@ public final class HdfsDefn {
           to_bitField0_ |= 0x00000004;
         }
         result.writemode_ = writemode_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.content_ = content_;
         if (chunksBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
             chunks_ = java.util.Collections.unmodifiableList(chunks_);
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000010);
           }
           result.chunks_ = chunks_;
         } else {
@@ -661,11 +745,16 @@ public final class HdfsDefn {
         if (other.hasWritemode()) {
           setWritemode(other.getWritemode());
         }
+        if (other.hasContent()) {
+          bitField0_ |= 0x00000008;
+          content_ = other.content_;
+          onChanged();
+        }
         if (chunksBuilder_ == null) {
           if (!other.chunks_.isEmpty()) {
             if (chunks_.isEmpty()) {
               chunks_ = other.chunks_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
             } else {
               ensureChunksIsMutable();
               chunks_.addAll(other.chunks_);
@@ -678,7 +767,7 @@ public final class HdfsDefn {
               chunksBuilder_.dispose();
               chunksBuilder_ = null;
               chunks_ = other.chunks_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
               chunksBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getChunksFieldBuilder() : null;
@@ -865,12 +954,88 @@ public final class HdfsDefn {
         return this;
       }
 
+      private java.lang.Object content_ = "";
+      /**
+       * <code>optional string content = 4;</code>
+       */
+      public boolean hasContent() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional string content = 4;</code>
+       */
+      public java.lang.String getContent() {
+        java.lang.Object ref = content_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            content_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string content = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getContentBytes() {
+        java.lang.Object ref = content_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          content_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string content = 4;</code>
+       */
+      public Builder setContent(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        content_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string content = 4;</code>
+       */
+      public Builder clearContent() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        content_ = getDefaultInstance().getContent();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string content = 4;</code>
+       */
+      public Builder setContentBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        content_ = value;
+        onChanged();
+        return this;
+      }
+
       private java.util.List<ds.hdfs.HdfsDefn.Block> chunks_ =
         java.util.Collections.emptyList();
       private void ensureChunksIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
           chunks_ = new java.util.ArrayList<ds.hdfs.HdfsDefn.Block>(chunks_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
          }
       }
 
@@ -878,7 +1043,7 @@ public final class HdfsDefn {
           ds.hdfs.HdfsDefn.Block, ds.hdfs.HdfsDefn.Block.Builder, ds.hdfs.HdfsDefn.BlockOrBuilder> chunksBuilder_;
 
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public java.util.List<ds.hdfs.HdfsDefn.Block> getChunksList() {
         if (chunksBuilder_ == null) {
@@ -888,7 +1053,7 @@ public final class HdfsDefn {
         }
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public int getChunksCount() {
         if (chunksBuilder_ == null) {
@@ -898,7 +1063,7 @@ public final class HdfsDefn {
         }
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public ds.hdfs.HdfsDefn.Block getChunks(int index) {
         if (chunksBuilder_ == null) {
@@ -908,7 +1073,7 @@ public final class HdfsDefn {
         }
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder setChunks(
           int index, ds.hdfs.HdfsDefn.Block value) {
@@ -925,7 +1090,7 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder setChunks(
           int index, ds.hdfs.HdfsDefn.Block.Builder builderForValue) {
@@ -939,7 +1104,7 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder addChunks(ds.hdfs.HdfsDefn.Block value) {
         if (chunksBuilder_ == null) {
@@ -955,7 +1120,7 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder addChunks(
           int index, ds.hdfs.HdfsDefn.Block value) {
@@ -972,7 +1137,7 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder addChunks(
           ds.hdfs.HdfsDefn.Block.Builder builderForValue) {
@@ -986,7 +1151,7 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder addChunks(
           int index, ds.hdfs.HdfsDefn.Block.Builder builderForValue) {
@@ -1000,7 +1165,7 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder addAllChunks(
           java.lang.Iterable<? extends ds.hdfs.HdfsDefn.Block> values) {
@@ -1015,12 +1180,12 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder clearChunks() {
         if (chunksBuilder_ == null) {
           chunks_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
           chunksBuilder_.clear();
@@ -1028,7 +1193,7 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public Builder removeChunks(int index) {
         if (chunksBuilder_ == null) {
@@ -1041,14 +1206,14 @@ public final class HdfsDefn {
         return this;
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public ds.hdfs.HdfsDefn.Block.Builder getChunksBuilder(
           int index) {
         return getChunksFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public ds.hdfs.HdfsDefn.BlockOrBuilder getChunksOrBuilder(
           int index) {
@@ -1058,7 +1223,7 @@ public final class HdfsDefn {
         }
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public java.util.List<? extends ds.hdfs.HdfsDefn.BlockOrBuilder> 
            getChunksOrBuilderList() {
@@ -1069,14 +1234,14 @@ public final class HdfsDefn {
         }
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public ds.hdfs.HdfsDefn.Block.Builder addChunksBuilder() {
         return getChunksFieldBuilder().addBuilder(
             ds.hdfs.HdfsDefn.Block.getDefaultInstance());
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public ds.hdfs.HdfsDefn.Block.Builder addChunksBuilder(
           int index) {
@@ -1084,7 +1249,7 @@ public final class HdfsDefn {
             index, ds.hdfs.HdfsDefn.Block.getDefaultInstance());
       }
       /**
-       * <code>repeated .hdfs.Block chunks = 4;</code>
+       * <code>repeated .hdfs.Block chunks = 5;</code>
        */
       public java.util.List<ds.hdfs.HdfsDefn.Block.Builder> 
            getChunksBuilderList() {
@@ -1097,7 +1262,7 @@ public final class HdfsDefn {
           chunksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               ds.hdfs.HdfsDefn.Block, ds.hdfs.HdfsDefn.Block.Builder, ds.hdfs.HdfsDefn.BlockOrBuilder>(
                   chunks_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
                   isClean());
           chunks_ = null;
@@ -6473,22 +6638,23 @@ public final class HdfsDefn {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\nhdfs.proto\022\004hdfs\"T\n\004File\022\014\n\004name\030\001 \002(\t" +
-      "\022\016\n\006handle\030\002 \001(\005\022\021\n\twritemode\030\003 \001(\010\022\033\n\006c" +
-      "hunks\030\004 \003(\0132\013.hdfs.Block\"\230\001\n\010DataNode\022\r\n" +
-      "\005sName\030\001 \002(\t\022\017\n\007address\030\002 \002(\t\022\014\n\004port\030\003 " +
-      "\002(\005\022\021\n\ttimestamp\030\004 \001(\001\022,\n\006status\030\005 \002(\0162\025" +
-      ".hdfs.DataNode.Status:\005ALIVE\"\035\n\006Status\022\t" +
-      "\n\005ALIVE\020\000\022\010\n\004DEAD\020\001\"\331\001\n\005Block\022\014\n\004name\030\001 " +
-      "\002(\t\022\020\n\010replicas\030\002 \001(\005\022\017\n\007content\030\003 \001(\t\022\r" +
-      "\n\005bytes\030\004 \001(\001\022\020\n\010location\030\005 \001(\t\022!\n\tdatan" +
-      "odes\030\006 \003(\0132\016.hdfs.DataNode\022\021\n\ttimestamp\030" +
-      "\007 \001(\001\022)\n\006status\030\010 \001(\0162\022.hdfs.Block.Statu" +
-      "s:\005ALIVE\"\035\n\006Status\022\t\n\005ALIVE\020\000\022\010\n\004DEAD\020\001\"" +
-      "\'\n\013Result_File\022\030\n\004file\030\001 \003(\0132\n.hdfs.File" +
-      "\"3\n\017Result_DataNode\022 \n\010datanode\030\001 \003(\0132\016." +
-      "hdfs.DataNode\"*\n\014Result_Block\022\032\n\005block\030\001" +
-      " \003(\0132\013.hdfs.BlockB\023\n\007ds.hdfsB\010HdfsDefn"
+      "\n\nhdfs.proto\022\004hdfs\"e\n\004File\022\014\n\004name\030\001 \002(\t" +
+      "\022\016\n\006handle\030\002 \001(\005\022\021\n\twritemode\030\003 \001(\010\022\017\n\007c" +
+      "ontent\030\004 \001(\t\022\033\n\006chunks\030\005 \003(\0132\013.hdfs.Bloc" +
+      "k\"\230\001\n\010DataNode\022\r\n\005sName\030\001 \002(\t\022\017\n\007address" +
+      "\030\002 \002(\t\022\014\n\004port\030\003 \002(\005\022\021\n\ttimestamp\030\004 \001(\001\022" +
+      ",\n\006status\030\005 \002(\0162\025.hdfs.DataNode.Status:\005" +
+      "ALIVE\"\035\n\006Status\022\t\n\005ALIVE\020\000\022\010\n\004DEAD\020\001\"\331\001\n" +
+      "\005Block\022\014\n\004name\030\001 \002(\t\022\020\n\010replicas\030\002 \001(\005\022\017" +
+      "\n\007content\030\003 \001(\t\022\r\n\005bytes\030\004 \001(\001\022\020\n\010locati" +
+      "on\030\005 \001(\t\022!\n\tdatanodes\030\006 \003(\0132\016.hdfs.DataN" +
+      "ode\022\021\n\ttimestamp\030\007 \001(\001\022)\n\006status\030\010 \001(\0162\022" +
+      ".hdfs.Block.Status:\005ALIVE\"\035\n\006Status\022\t\n\005A" +
+      "LIVE\020\000\022\010\n\004DEAD\020\001\"\'\n\013Result_File\022\030\n\004file\030" +
+      "\001 \003(\0132\n.hdfs.File\"3\n\017Result_DataNode\022 \n\010" +
+      "datanode\030\001 \003(\0132\016.hdfs.DataNode\"*\n\014Result" +
+      "_Block\022\032\n\005block\030\001 \003(\0132\013.hdfs.BlockB\023\n\007ds" +
+      ".hdfsB\010HdfsDefn"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6507,7 +6673,7 @@ public final class HdfsDefn {
     internal_static_hdfs_File_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_hdfs_File_descriptor,
-        new java.lang.String[] { "Name", "Handle", "Writemode", "Chunks", });
+        new java.lang.String[] { "Name", "Handle", "Writemode", "Content", "Chunks", });
     internal_static_hdfs_DataNode_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_hdfs_DataNode_fieldAccessorTable = new
