@@ -45,6 +45,7 @@ public class DataNode implements IDataNode
 	//method that takes in blocklocation of chunk to read and returns contents of block in byte array
    	 public byte[] readBlock(byte[] Inp)
    	 {
+	 System.out.println("DataNode readBlock is accepted");
         HdfsDefn.File.Builder retFile = HdfsDefn.File.newBuilder();
         try
         {
@@ -68,6 +69,7 @@ public class DataNode implements IDataNode
 	//given a datanode, writes content from file into datanode and returns index of the chunk
     	public byte[] writeBlock(byte[] Inp)
     	{
+	System.out.println("DataNode writeBlock is accepted");
         BufferedInputStream bis;
     	HdfsDefn.File.Builder retFile = HdfsDefn.File.newBuilder();
         try
