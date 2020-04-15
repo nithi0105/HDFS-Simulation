@@ -241,6 +241,7 @@ public class NameNode implements INameNode{
 	
 	public byte[] list() throws RemoteException
 	{
+		System.out.println("NameNode list method is accepted");
 		//list all files in arraylist (no directory implementation)
 		HdfsDefn.Result_File result = null;
 		try {
