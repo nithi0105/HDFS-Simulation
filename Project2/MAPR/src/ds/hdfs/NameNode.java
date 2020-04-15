@@ -103,6 +103,7 @@ public class NameNode implements INameNode{
 	
 	public byte[] openFile(byte[] inp) throws RemoteException
 	{
+		System.out.println("NameNode openFile command accepted");
 		HdfsDefn.File.Builder ret = HdfsDefn.File.newBuilder();
 		try
 		{
@@ -146,6 +147,7 @@ public class NameNode implements INameNode{
 	
 	public byte[] getBlockLocations(byte[] inp ) throws RemoteException
 	{
+		System.out.println("NameNode getting block locations");
 		//find blocks to put together file for read
 		HdfsDefn.Result_DataNode.Builder resDn = HdfsDefn.Result_DataNode.newBuilder();
 		try
@@ -176,6 +178,7 @@ public class NameNode implements INameNode{
 	
 	public byte[] assignBlock(byte[] inp ) throws RemoteException
 	{
+		System.out.println("NameNode assigning blocks");
 		HdfsDefn.File.Builder retFile = HdfsDefn.File.newBuilder();
 		
 		try
@@ -264,6 +267,7 @@ public class NameNode implements INameNode{
 		
 	public byte[] blockReport(byte[] inp ) throws RemoteException
 	{
+		System.out.println("NameNode sending blockReport");
 		HdfsDefn.Result_Block.Builder resBlocks = HdfsDefn.Result_Block.newBuilder();
 		try {
 			HdfsDefn.File input = HdfsDefn.File.parseFrom(inp);
@@ -284,6 +288,7 @@ public class NameNode implements INameNode{
 	
 	public byte[] heartBeat(byte[] inp ) throws RemoteException
 	{
+		System.out.println("NameNode sending heartBeat");
 		HdfsDefn.DataNode.Builder response = HdfsDefn.DataNode.newBuilder();
 		
 			try {
